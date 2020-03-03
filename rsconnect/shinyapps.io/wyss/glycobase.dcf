@@ -1,0 +1,13 @@
+name: glycobase
+title: glycobase
+username:
+account: wyss
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1849690
+bundleId: 2835125
+url: https://wyss.shinyapps.io/glycobase/
+when: 1582827813.49526
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: README.md|data/v1_glycobase.csv|data/v1_tsne_glycoletters.csv|data/v1_tsne_glycowords.csv|cache
