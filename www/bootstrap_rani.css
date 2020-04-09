@@ -8302,6 +8302,12 @@ body.skin-blue p {
     font-family: GraphikLight, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 }
 
+/* Box hovers */
+
+#modal_glycans {
+    opacity: 0.7;
+}
+
 /* DNA ANIMATION */
 /* https://codepen.io/chriskirknielsen/pen/MVmaRJ */
 
