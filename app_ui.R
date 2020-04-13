@@ -58,6 +58,9 @@ AuthenticatedUI <- dashboardPage(
     tags$head(tags$style(HTML('.logo {
                               background-color: #0f9971ff !important;
                               }
+                              .main-header .logo {
+                                font-family: "GraphikMedium",Helvetica,Arial,sans-serif;
+                              }
                               .navbar {
                               background-color: #00B07D !important;
                               }
@@ -91,25 +94,26 @@ AuthenticatedUI <- dashboardPage(
                                 text-decoration: underline;
                               }'
     ))),
-    sidebarMenu(
+    sidebarMenu(id='tabs',
       p(),
-      menuItem("GlycoBase overview", tabName = "tab_overview", icon = icon("star")),
-      menuItem("Glycan alignment", tabName = "tab_alignment", icon = icon("stream")),
-      menuItem("Characteristic environment", tabName = "tab_env", icon = icon("chart-bar")),
-      menuItem("Submit a glycan", tabName = "tab_submit", icon = icon("plus-square")),
+      menuItem("GlycoBase overview", tabName = "home", icon = icon("star")),
+      menuItem("Glycan alignment", tabName = "alignment", icon = icon("stream"),
+               badgeLabel = 'New!', badgeColor = 'green'),
+      menuItem("Characteristic environment", tabName = "structuralcontext", icon = icon("chart-bar")),
+      menuItem("Submit a glycan", tabName = "submit", icon = icon("plus-square")),
       #menuItem("SweetTalk", tabName = "tab_sweettalk", icon = icon("comment-dots")),
       #menuItem("SweetOrigins", tabName = "tab_sweetorigins", icon = icon("project-diagram")),
       #menuItem("Biomining", tabName = "tab_biomining", icon = icon("microscope")),
       div(actionLink('citation_modal', 'Citing GlycoBase',
                      style = 'color: #00B07D; padding-top: 30px;'), 
-          style = 'font-size: 8pt; margin: 0px 5px 20px 0px;')
+          style = 'font-size: 10pt; margin: 0px 5px 20px 0px;')
     ),
     br(),
     div(style = 'position: fixed; bottom: 20px; margin: 0px 20px 0 20px; width: 180px;',
         img(src = 'www/wyss-logo-white-square.png', width = '140px'),
-        p('This tool was developed by the Predictive BioAnalytics group',
+        p('This app was built at the Wyss Institute for Biologically Inspired Engineering',
           style = 'font-size: 8pt; margin-top: 10px',),
-        a('View our other apps', href = 'https://midas-wyss.github.io/',
+        a('Visit our website to learn more', href = 'https://wyss.harvard.edu/',
           target = '_blank', style = 'font-size: 8pt; color: #00B07D;')
     )
   ),
@@ -140,7 +144,7 @@ AuthenticatedUI <- dashboardPage(
     # olive = light green
     
     tabItems(
-      tabItem(tabName = 'tab_overview',
+      tabItem(tabName = 'home',
               h2('GlycoBase overview'),
               fluidRow(
                 actionLink('modal_glycans', class='hoverbox',
@@ -181,7 +185,7 @@ AuthenticatedUI <- dashboardPage(
                     div(withSpinner(dataTableOutput('table_glycobase'), type = 4, color = '#00B07D')))
               )
         ),
-        tabItem(tabName = 'tab_env',
+        tabItem(tabName = 'structuralcontext',
                 h2('Characteristic environment'),
                 fluidRow(
                   box(title = tagList("Query local structural context for a glycoletter",
@@ -223,7 +227,7 @@ AuthenticatedUI <- dashboardPage(
                   )
                 )
         ),
-        tabItem(tabName = 'tab_alignment',
+        tabItem(tabName = 'alignment',
                 h2('Glycan alignment'),
                 fluidRow(
                   box(title = tagList("Input a glycan sequence to perform pairwise alignment",
