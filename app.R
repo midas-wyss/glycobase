@@ -157,13 +157,15 @@ server <- function(input, output, session) {
     observeEvent(input$user_account_modal, {
       showModal(
         modalDialog(title = "We appreciate your interest in GlycoBase!",
-                    HTML('<strong>Additional resources</strong>'),
+                    HTML('<div><strong>Additional resources</strong></div>'),
                     br(),
-                    HTML('<p>View and download GlycoBase data from Synapse:</p><a href="https://www.synapse.org/#!Synapse:syn21568077/wiki/600880"><img src="synapse_logo.png" title="View the Synapse project" width="200" /></a>'),
+                    HTML('<div style="float:left;margin-right: 15px;margin-top: 23px;">
+                         <a href="https://www.synapse.org/#!Synapse:syn21568077/wiki/600880""><img src="synapse_logo.png" title="View the Synapse project" width="200" /></a><p><a href="https://www.synapse.org/#!Synapse:syn21568077/wiki/600880" style="color: #00B07D;">View and download GlycoBase data from Synapse</a></p></div>'),
                     br(),
-                    HTML('<p>View the GlycoBase code on Github:</p><a href="https://github.com/midas-wyss/glycobase"><img src="github_logo.png" title="View the code" width="100" /></a>'),
+                    HTML('<div style="float:left;padding-bottom: 15px;padding-left: 15px;">
+                         <a href="https://github.com/midas-wyss/glycobase"><img src="github_logo.png" title="View the code" width="100" /></a><p><a href="https://github.com/midas-wyss/glycobase" style="color: #00B07D;">View the GlycoBase code on Github</a></p></div>'),
                     br(),
-                    p('For additional questions or suggestions, please email daniel.bojar@wyss.harvard.edu.'),
+                    div('For additional questions or suggestions, please email daniel.bojar@wyss.harvard.edu.', style="clear:left;"),
                     easyClose = T,
                     footer = tagList(
                       modalButton("Back to Analysis")
