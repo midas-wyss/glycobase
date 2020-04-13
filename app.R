@@ -51,7 +51,7 @@ if (Sys.info()[['sysname']] != 'Darwin'){
                                 python = '/usr/bin/python3')
   reticulate::virtualenv_install('python35_gly_env', 
                                  packages = c('synapseclient', 'requests',
-                                              'pandas'))
+                                              'pandas', 'numpy'))
 }
 reticulate::use_virtualenv('python35_gly_env', required = T)
 
@@ -498,7 +498,7 @@ server <- function(input, output, session) {
                         choices = bonds())
     } else{
       updateSelectInput(session, 'select_context_glycoletter', 
-                        choices = monos())
+                        choices = monos(), selected = 'Rha')
     }
   })
   
@@ -555,6 +555,169 @@ server <- function(input, output, session) {
              xaxis = list(title = 'Position'),
              yaxis = list(title = 'Ocurrence'))
     
+  })
+  
+  # ---------------------- TAB 3: GLYCAN ALIGNMENT ------------------------ #
+  reticulate::source_python('glycan_alignment.py')
+  alignmentData <- reactiveValues(alignment_message = NULL,
+                                  input_valid = NULL,
+                                  alignment_df = NULL)
+  
+  glycan_query_seq <- reactive({ input$glycan_query })
+  validated_query_seq <- reactive({ alignmentData$input_valid })
+  
+  observeEvent(input$info_alignment_modal, {
+    showModal(
+      modalDialog(title = "Glycan alignment",
+                  p('A common method of analyzing motifs in biological sequences that capitalizes on evolutionary information is the use
+                     of alignments. This tab on GlycoBase performs gapped, pairwise alignments of glycan sequences, assisted
+                     by a substitution matrix analogous to the BLOSUM matrices utilized in protein alignments (which we termed GLYcan SUbstitution Matrix, GLYSUM).'),
+                  HTML('<p>Global sequence alignment of glycans was implemented according to the Needleman Wunsch algorithm by adapting 
+                    the <a href="https://github.com/eseraygun/pythonalignment" style="color: #00B07D;">Python Alignment library</a>.</p>'),
+                  br(),
+                  HTML('<strong>Scoring with the GLYcan SUbstitution Matrix (GLYSUM)</strong>'),
+                  HTML('<p>The exhaustive list of in silico modifications resulting in glycans with observed glycowords was generated (n
+                        = 1,238,879). All thereby observed monosaccharide and/or bond substitutions were recorded in a
+                        symmetric matrix and converted into substitution frequencies by dividing them by the total number of
+                        retained modifications.</p>'),
+                  HTML('<p>Substitutions never observed during this procedure received a final value of -5, lower than any of the observed substitution scores, 
+                        while the diagonal values of the substitution matrix re set at 5, higher than any of the observed substitution scores. 
+                        The penalty for gaps for alignments in this work was set at -5, to match the minimal substitution score. The penalty for mismatches was -10.</p>'),
+                  a('Read the full methods in our preprint (opens in a new window)', href='https://www.biorxiv.org/content/10.1101/2020.04.08.031948v1.full.pdf+html', 
+                    style='color: #00B07D;', target='_blank'),
+                  easyClose = T,
+                  footer = NULL)
+    )
+  })
+  
+  observeEvent(input$button_run_alignment, {
+    alignmentData$alignment_df <- NULL
+    query = glycan_query_seq()
+    
+    if (!is.null(query)){
+      if (!grepl('\\(', query)){
+        alignmentData$alignment_message <- 'Please use the IUPAC condensed nomenclature shown on GlycoBase.'
+      } else{
+        alignmentData$alignment_message <- ''
+        alignmentData$input_valid <- query
+      }
+    }
+  })
+  
+  output$message_run_alignment <- renderText({
+    return(alignmentData$alignment_message)
+  })
+  
+  observeEvent(input$button_show_alignment_example, {
+    query = 'ManNAcA(b1-4)FucNAcOAc(a1-3)D-FucNAc(b1-4)ManNAcA'
+    updateTextInput(session, 'glycan_query', value = query)
+  })
+  
+  observeEvent(validated_query_seq(), {
+    
+    withProgress(message = 'Aligning...', value = 0, {
+      
+      incProgress(0.2, detail = '(1-2 minutes)')
+      
+      query = validated_query_seq()
+      
+      incProgress(0.3, detail = '(1-2 minutes)')
+      
+      if (!is.null(query)){
+        alignment_df = pairwiseAlign(query, n=0) # n=0 returns all
+        
+        alignment_df$Species = unlist(lapply(alignment_df$Species, function(x){
+          gsub("\\['|'\\]|'", "", x)
+        }))
+                          
+        incProgress(0.4, detail = 'Finishing up')
+        
+        if (!is.null(alignment_df)){
+          
+          df = as.data.frame(alignment_df)
+          df$Species = gsub("_", ' ', df$Species)
+          df = unique(df)
+          
+          df = df[,c('Query_Sequence', 'Aligned_Sequence', 'Score',
+                     'Species', 'Percent_Identity', 'Percent_Coverage', 'Glycobase_ID')]
+          
+          alignmentData$alignment_df <- df
+          
+          # Save csv
+          write.table(df, 'data/alignment_df.csv', sep = ',',
+                      row.names = F)
+          
+        } else{
+          alignmentData$alignment_df <- NULL
+        }
+      } else{
+        alignmentData$alignment_df <- NULL
+      }
+    })
+  })
+  
+  alignment_table <- reactive({ alignmentData$alignment_df })
+  
+  output$button_download_alignments <- downloadHandler(
+    filename = paste0("GlycoBase_glycan_pairwise_alignment_", gsub('-', '_', Sys.Date()), ".csv"),
+    content = function(file) {
+      if (file.exists('data/alignment_df.csv')){
+        file.copy('data/alignment_df.csv', file)
+      } else{
+        NULL
+      }
+    }
+  )
+  
+  USE_PRECOMPUTED_ALIGNMENT = FALSE
+  
+  output$alignments_ui <- renderUI({
+    if (USE_PRECOMPUTED_ALIGNMENT){
+      dat = readRDS('cache/dat.rds')
+    } else{
+      dat = alignment_table()
+    }
+    
+    if (!is.null(dat)){
+      n = nrow(dat)
+      
+      return(tagList(
+        div(downloadButton('button_download_alignments', label = 'Download all (csv)', style = 'margin-right: 15px; float: right;', icon = icon('download')),
+            HTML('<h2>Pairwise alignment results <span style="font-size: 10pt;">(Top 5 shown)</span></h2>'),
+            style = 'padding-left: 15px;'),
+        lapply(1:5, function(i) {
+          a = sapply(strsplit(as.character(dat[i, 'Query_Sequence']), ' ')[[1]], function(s) {
+            if (s != ''){
+              paste0('<span class="alignment_item">', s, '</span>')
+            }
+          })
+          b = sapply(strsplit(as.character(dat[i, 'Aligned_Sequence']), ' ')[[1]], function(s) {
+            if (s != ''){
+              paste0('<span class="alignment_item">', s, '</span>')
+            }
+          })
+          gbid = as.character(dat[i, 'Glycobase_ID'])
+          species = as.character(dat[i, 'Species'])
+          score = as.character(dat[i, 'Score'])
+          percent_id = as.character(round(dat[i, 'Percent_Identity'], 3))
+          percent_coverage = as.character(round(dat[i, 'Percent_Coverage'], 3))
+          
+          box(title = paste0('Alignment #', i, ': ', gbid), 
+              width = 12,
+              div(style = 'padding-left: 15px; padding-bottom: 15px;',
+                h4({ paste0('Score: ', score) }, style='color: #00B07D'),
+                p({ paste0('Percent identity: ', percent_id) }),
+                p({ paste0('Percent coverage: ', percent_coverage) }),
+                p(HTML({ paste0('Species: <i>', species, '</i>') })),
+                br(),
+                strong('Alignment: '),
+                div(HTML(a), class = 'alignment_row1'),
+                div(HTML(b), class = 'alignment_row2')
+              )
+          )
+        })
+      ))
+    }
   })
   
 }

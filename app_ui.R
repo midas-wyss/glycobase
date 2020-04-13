@@ -65,18 +65,39 @@ AuthenticatedUI <- dashboardPage(
                               background-color: #00B07D !important;
                               }
                               .skin-blue .sidebar-menu > li.active > a,
-                              .skin-blue .sidebar-menu > li:hover > a { border-left-color: #0f9971ff;}'
+                              .skin-blue .sidebar-menu > li:hover > a { border-left-color: #0f9971ff;}
+                              .alignment_row1, .alignment_row2 {
+                                border: 1px solid #e2e2e2;
+                              }
+                              .alignment_row1 .alignment_item, .alignment_row2 .alignment_item {
+                                display: inline-block;
+                                width: 10%;
+                                border-right: 1px solid #e2e2e2;
+                                padding: 10px;
+                                text-align: center;
+                                min-width: 80px;
+                                position: relative;
+                              }
+                              .alignment_row1 {
+                                background-color: #f2f2f2;
+                                margin-bottom: -1px;
+                              }
+                              .alignment_row1 .alignment_item {
+                              }
+                              .info-tip:hover {
+                                text-decoration: underline;
+                              }'
     ))),
     sidebarMenu(
       p(),
       menuItem("GlycoBase overview", tabName = "tab_overview", icon = icon("star")),
       menuItem("Characteristic environment", tabName = "tab_env", icon = icon("chart-bar")),
+      menuItem("Glycan alignment", tabName = "tab_alignment", icon = icon("stream")),
       menuItem("Submit a glycan", tabName = "tab_submit", icon = icon("plus-square")),
       #menuItem("SweetTalk", tabName = "tab_sweettalk", icon = icon("comment-dots")),
       #menuItem("SweetOrigins", tabName = "tab_sweetorigins", icon = icon("project-diagram")),
-      #menuItem("Glycan alignment", tabName = "tab_alignment", icon = icon("stream")),
       #menuItem("Biomining", tabName = "tab_biomining", icon = icon("microscope")),
-      div(actionLink('citation_modal', 'Citing GlycoBase', 
+      div(actionLink('citation_modal', 'Citing GlycoBase',
                      style = 'color: #00B07D; padding-top: 30px;'), 
           style = 'font-size: 8pt; margin: 0px 5px 20px 0px;')
     ),
@@ -85,14 +106,20 @@ AuthenticatedUI <- dashboardPage(
         img(src = 'www/wyss-logo-white-square.png', width = '140px'),
         p('This tool was developed by the Predictive BioAnalytics group',
           style = 'font-size: 8pt; margin-top: 10px',),
-        a('View our other apps', href = 'https://midas-wyss.github.io/', 
+        a('View our other apps', href = 'https://midas-wyss.github.io/',
           target = '_blank', style = 'font-size: 8pt; color: #00B07D;')
     )
   ),
   
   dashboardBody(
     tags$head(includeHTML('www/analytics.html'),
-              tags$style('.shiny-output-error{color: white;}'),
+              tags$style('.shiny-output-error{color: white;}
+                         .progress-bar { background-color: #00B07D; }
+                          .shiny-notification {
+                            position: fixed;
+                            top: 40%;
+                            left: 40%;
+                            right: 40%;"'),
               HTML('<link rel="icon" href="www/favicon.ico" type="image/x-icon"/>')),
     tags$style(
       type = 'text/css',
@@ -153,17 +180,17 @@ AuthenticatedUI <- dashboardPage(
                   box(title = 'Query the characteristic environment of a glycoletter (monosaccharide or bond)',
                       width = 7, height = 320,
                       div(selectInput('select_context_criteria', label = 'Query type',
-                                  choices = c('Observed monosaccharides making bond:',
-                                              'Observed monosaccharides paired with:',
+                                  choices = c('Observed monosaccharides paired with:',
+                                              'Observed monosaccharides making bond:',
                                               'Observed bonds made by:')),
-                          style = 'width: 53%; display: inline-block; max-width: 380px; min-width: 300px; padding-top: 20px; padding-left: 20px;'),
+                          style = 'width: 53%; display: inline-block; max-width: 380px; min-width: 300px; padding-top: 20px; padding-left: 15px;'),
                       div(selectInput('select_context_glycoletter', label = 'Glycoletter',
                                   choices = 'Loading...'), 
                           style = 'width: 40%; display: inline-block; max-width: 175px;'),
                       hr(style = 'margin-top: 0'),
                       div(selectInput('select_context_taxonomy_level', label = 'Taxonomic filter',
                                   choices = c('Kingdom', 'Species')),
-                          style = 'width: 49%; display: inline-block; max-width: 150px; padding-left: 20px;'),
+                          style = 'width: 49%; display: inline-block; max-width: 150px; padding-left: 15px;'),
                       div(selectInput('select_context_taxonomy_value', label = 'Kingdom',
                                   choices = 'Loading...'),
                           style = 'width: 49%; display: inline-block; max-width: 350px;')
@@ -180,16 +207,40 @@ AuthenticatedUI <- dashboardPage(
                   )
                 )
         ),
+        tabItem(tabName = 'tab_alignment',
+                h2('Glycan alignment'),
+                fluidRow(
+                  box(title = tagList("Input a glycan sequence to perform pairwise alignment",
+                                      HTML('&nbsp;&nbsp;'),
+                                      tags$i(
+                                        class = "fa fa-info-circle", 
+                                        style = "color: #00B07D; font-size: 8pt;"
+                                      ),
+                                      actionLink('info_alignment_modal', 
+                                                 label = 'What is this?',
+                                                 class = 'info-tip',
+                                                 style = 'font-size: 8pt; color: #00B07D;')),
+                      width = 12,
+                      div(style='padding-left: 15px; padding-bottom: 15px;',
+                        textInput('glycan_query', label = 'Query sequence', 
+                                placeholder = 'Glycan sequence in IUPAC condensed format'),
+                        actionButton('button_run_alignment', label = 'Align sequence',
+                                   style = 'color: #ffffff; background-color: #00B07D; border-color: #0f9971ff; border-radius: 5px;'),
+                        actionButton('button_show_alignment_example', label = 'Give me an example', style = 'margin-left: 10px;'),
+                        textOutput('message_run_alignment')
+                      )
+                  )
+                ),
+                fluidRow(
+                  uiOutput('alignments_ui')
+                )
+        ),
         tabItem(tabName = 'tab_sweettalk',
                 h2('SweetTalk'),
                 p('Coming soon')
         ),
         tabItem(tabName = 'tab_sweetorigins',
                 h2('SweetOrigins'),
-                p('Coming soon')
-        ),
-        tabItem(tabName = 'tab_alignment',
-                h2('Glycan-based alignment'),
                 p('Coming soon')
         ),
         tabItem(tabName = 'tab_biomining',
