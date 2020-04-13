@@ -110,7 +110,7 @@ AuthenticatedUI <- dashboardPage(
     ),
     br(),
     div(style = 'position: fixed; bottom: 20px; margin: 0px 20px 0 20px; width: 180px;',
-        img(src = 'www/wyss-logo-white-square.png', width = '140px'),
+        img(src = 'www/wyss-logo-white.png', width = '160px'),
         p('This app was built at the Wyss Institute for Biologically Inspired Engineering',
           style = 'font-size: 8pt; margin-top: 10px',),
         a('Visit our website to learn more', href = 'https://wyss.harvard.edu/',
@@ -267,7 +267,7 @@ AuthenticatedUI <- dashboardPage(
                 h2('Biomining'),
                 p('Coming soon')
         ),
-        tabItem(tabName = 'tab_submit',
+        tabItem(tabName = 'submit',
                 h2('Submit a new glycan'),
                 HTML('<div class="typeform-widget" data-url="https://ranipowers.typeform.com/to/gmNmrW" style="width: 100%; height: 600px;"></div> <script> (function() { var qs,js,q,s,d=document, gi=d.getElementById, ce=d.createElement, gt=d.getElementsByTagName, id="typef_orm", b="https://embed.typeform.com/"; if(!gi.call(d,id)) { js=ce.call(d,"script"); js.id=id; js.src=b+"embed.js"; q=gt.call(d,"script")[0]; q.parentNode.insertBefore(js,q) } })() </script> <div style="font-family: Sans-Serif;font-size: 12px;color: #999;opacity: 0.5; padding-top: 5px;"> powered by <a href="https://admin.typeform.com/signup?utm_campaign=gmNmrW&utm_source=typeform.com-01E4M277GRYSX45RZ0PSMP63SW-free&utm_medium=typeform&utm_content=typeform-embedded-poweredbytypeform&utm_term=EN" style="color: #999" target="_blank">Typeform</a> </div>')
         )
