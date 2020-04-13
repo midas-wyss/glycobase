@@ -156,11 +156,14 @@ server <- function(input, output, session) {
     # Logout modal
     observeEvent(input$user_account_modal, {
       showModal(
-        modalDialog(title = "Welcome, Guest!",
-                    HTML('<p>We appreciate your interest in GlycoBase. Here are some additional resources you may find useful:<br>
-                      <a href="https://www.synapse.org/#!Synapse:syn21568077/wiki/600880" target="_blank">View/download the GlycoBase project on Synapse</a><br>
-                      <a href="https://github.com/midas-wyss/glycobase" target="_blank">View the GlycoBase code on Github</a></p>'),
-                    p('For additional questions, please email daniel.bojar@wyss.harvard.edu.'),
+        modalDialog(title = "We appreciate your interest in GlycoBase!",
+                    HTML('<strong>Additional resources</strong>'),
+                    br(),
+                    HTML('<p>View and download GlycoBase data from Synapse:</p><a href="https://www.synapse.org/#!Synapse:syn21568077/wiki/600880"><img src="synapse_logo.png" title="View the Synapse project" width="200" /></a>'),
+                    br(),
+                    HTML('<p>View the GlycoBase code on Github:</p><a href="https://github.com/midas-wyss/glycobase"><img src="github_logo.png" title="View the code" width="100" /></a>'),
+                    br(),
+                    p('For additional questions or suggestions, please email daniel.bojar@wyss.harvard.edu.'),
                     easyClose = T,
                     footer = tagList(
                       modalButton("Back to Analysis")
