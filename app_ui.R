@@ -69,6 +69,9 @@ AuthenticatedUI <- dashboardPage(
                               .alignment_row1, .alignment_row2 {
                                 border: 1px solid #e2e2e2;
                               }
+                              .no-header-box .box-header {
+                                display: none;
+                              }
                               .alignment_row1 .alignment_item, .alignment_row2 .alignment_item {
                                 display: inline-block;
                                 width: 10%;
@@ -169,7 +172,11 @@ AuthenticatedUI <- dashboardPage(
                 ))
               ),
               fluidRow(
-                box(title = 'Full GlycoBase dataset (v2.0)',
+                class = 'no-header-box',
+                div(downloadButton('button_download_glycobase', label = 'Download full (csv)', style = 'margin-right: 15px; float: right;', icon = icon('download')),
+                    HTML('<h2>Search GlycoBase <span style="font-size: 10pt;">(v2.0)</span></h2>'),
+                    style = 'padding-left: 15px;'),
+                box(title = '',
                     width = 12,
                     div(withSpinner(dataTableOutput('table_glycobase'), type = 4, color = '#00B07D')))
               )

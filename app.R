@@ -456,6 +456,16 @@ server <- function(input, output, session) {
     ))
   })
   
+  output$button_download_glycobase <- downloadHandler(
+    filename = paste0("GlycoBase_v2_", gsub('-', '_', Sys.Date()), ".csv"),
+    content = function(file) {
+      if (file.exists('data/glycobase_df.csv')){
+        file.copy('data/glycobase_df.csv', file)
+      } else{
+        NULL
+      }
+    }
+  )
   
   # Show the whole glycobase table
   output$table_glycobase <- DT::renderDT({
@@ -464,6 +474,8 @@ server <- function(input, output, session) {
     df$Link = factor(df$Link, c('N', 'O', 'Free', 'None'))
     df$Immunogenic = factor(df$Immunogenic, c('Yes', 'No', 'Unknown'))
     df$Species = factor(df$Species, specs())
+    
+    write.table(df, 'data/glycobase_df.csv', sep = ',', row.names = F)
     
     if (!is.null(df)){
       
