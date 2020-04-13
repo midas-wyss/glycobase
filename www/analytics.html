@@ -6,4 +6,25 @@
   gtag('js', new Date());
 
   gtag('config', 'UA-147968380-7');
+  
+  $(function() {
+    $('.sidebar-menu li a').on('click', function() {
+      var page_name = $(this).data('value');
+      gtag('config', 'UA-147968380-7', {'page_path': page_name});
+    });
+    
+    $('#button_run_alignment').on('click', function() {
+      gtag('event', 'run', {
+        'event_category': 'alignment',
+        'event_label': 'pairwise alignment'
+      });
+    });
+    
+    $('#button_show_alignment_example').on('click', function() {
+      gtag('event', 'show example', {
+        'event_category': 'alignment',
+        'event_label': 'example alignment'
+      });
+    });
+  });
 </script>

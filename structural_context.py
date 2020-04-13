@@ -1,5 +1,5 @@
 from collections import Counter
-from glycan_processing_helpers import df_species, link_find
+from glycan_processing import df_species, link_find
 import pickle
 import re
 
