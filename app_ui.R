@@ -94,8 +94,8 @@ AuthenticatedUI <- dashboardPage(
     sidebarMenu(
       p(),
       menuItem("GlycoBase overview", tabName = "tab_overview", icon = icon("star")),
-      menuItem("Characteristic environment", tabName = "tab_env", icon = icon("chart-bar")),
       menuItem("Glycan alignment", tabName = "tab_alignment", icon = icon("stream")),
+      menuItem("Characteristic environment", tabName = "tab_env", icon = icon("chart-bar")),
       menuItem("Submit a glycan", tabName = "tab_submit", icon = icon("plus-square")),
       #menuItem("SweetTalk", tabName = "tab_sweettalk", icon = icon("comment-dots")),
       #menuItem("SweetOrigins", tabName = "tab_sweetorigins", icon = icon("project-diagram")),
@@ -184,7 +184,16 @@ AuthenticatedUI <- dashboardPage(
         tabItem(tabName = 'tab_env',
                 h2('Characteristic environment'),
                 fluidRow(
-                  box(title = 'Query the characteristic environment of a glycoletter (monosaccharide or bond)',
+                  box(title = tagList("Query local structural context for a glycoletter",
+                                      HTML('&nbsp;&nbsp;'),
+                                      tags$i(
+                                        class = "fa fa-info-circle", 
+                                        style = "color: #00B07D; font-size: 8pt;"
+                                      ),
+                                      actionLink('info_environment_modal', 
+                                                 label = 'What is this?',
+                                                 class = 'info-tip',
+                                                 style = 'font-size: 8pt; color: #00B07D;')),
                       width = 7, height = 320,
                       div(selectInput('select_context_criteria', label = 'Query type',
                                   choices = c('Observed monosaccharides paired with:',

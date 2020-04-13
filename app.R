@@ -157,10 +157,9 @@ server <- function(input, output, session) {
     observeEvent(input$user_account_modal, {
       showModal(
         modalDialog(title = "Welcome, Guest!",
-                    p('Thanks for using GlycoBase. Looking for raw data?'),
-                    a('View the GlycoBase data on Synapse', 
-                      href='https://www.synapse.org/#!Synapse:syn21568077/wiki/600880',
-                      target='_blank'),
+                    HTML('<p>Thanks for using GlycoBase. Looking for more raw data? 
+                      <a href="https://www.synapse.org/#!Synapse:syn21568077/wiki/600880" target="_blank">View the GlycoBase project on Synapse</a>.</p>'),
+                    p('For additional questions, please email daniel.bojar@wyss.harvard.edu.'),
                     easyClose = T,
                     footer = tagList(
                       modalButton("Back to Analysis")
@@ -180,10 +179,10 @@ server <- function(input, output, session) {
   observeEvent(input$citation_modal, {
     showModal(modalDialog(
       title = 'Citing GlycoBase',
-      p('When using GlycoBase in your research, please cite the following:'),
+      p('When using GlycoBase and our glycan alignment tool in your research, please cite the following:'),
       div(style = 'padding-left: 30px;',
-        p('D. Bojar, D.M. Camacho, J.J. Collins. Using Natural Language Processing to Learn the Grammar of Glycans.'),
-        a('Preprint available on bioRxiv', href = 'https://www.biorxiv.org/content/10.1101/2020.01.10.902114v1',
+        p('D. Bojar, R.K. Powers, D.M. Camacho, J.J. Collins. SweetOrigins: Extracting Evolutionary Information from Glycans.'),
+        a('Read the preprint on bioRxiv (opens in a new window)', href = 'https://www.biorxiv.org/content/10.1101/2020.04.08.031948v1.full.pdf+html',
           target = '_blank',
           style = 'color: #00B07D;')
       ),
@@ -502,6 +501,18 @@ server <- function(input, output, session) {
   selected_context_glycoletter <- reactive({ input$select_context_glycoletter })
   context_tax_level <- reactive({ input$select_context_taxonomy_level })
   selected_tax_value <- reactive({ input$select_context_taxonomy_value })
+  
+  observeEvent(input$info_environment_modal, {
+    showModal(
+      modalDialog(title = "Analyzing the local structural context of glycoletters",
+                  p('This tab highlights the characteristic local structural context of a glycoletter (monosaccharide or bond). It also shows its frequency by position in the glycan structure (main versus side branch).'),
+                  p('For all glycans in our database with species information, we constructed a library of disaccharide motifs that are present in any species to generate leads for glycosyltransferase biomining.'),
+                  a('Read the full methods in our preprint (opens in a new window)', href='https://www.biorxiv.org/content/10.1101/2020.04.08.031948v1.full.pdf+html', 
+                    style='color: #00B07D;', target='_blank'),
+                  easyClose = T,
+                  footer = NULL)
+    )
+  })
   
   observeEvent(context_query_criteria(), {
     criteria = context_query_criteria()
