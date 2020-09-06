@@ -16,13 +16,13 @@ source('plot_helpers.R')
 AnonymousUI <- fluidPage(
   tags$head(tags$link(rel="stylesheet", type="text/css", href="bootstrap_rani.css"),
             HTML('<link rel="icon" href="www/favicon.ico" type="image/x-icon"/>')),
-  title = 'GlycoBase',
+  title = 'SugarBase',
   
   # Wyss logo
   div(img(src = paste0('www/wyss-logo-white.png'), width = '200px'),
       style='text-align: center; padding-top: 30px;'),
   
-  h1('GlycoBase'),
+  h1('SugarBase'),
   
   # Glycan logo
   div(img(src = paste0('www/glycobase_home.png'), width = '100px'),
@@ -45,7 +45,7 @@ AnonymousUI <- fluidPage(
 AuthenticatedUI <- dashboardPage(
   skin = 'blue',
   
-  dashboardHeader(title = 'GlycoBase',
+  dashboardHeader(title = 'SugarBase',
                   titleWidth = 250,
                   tags$li(class = "dropdown",
                           tags$li(class = "dropdown", 
@@ -96,7 +96,7 @@ AuthenticatedUI <- dashboardPage(
     ))),
     sidebarMenu(id='tabs',
       p(),
-      menuItem("GlycoBase overview", tabName = "home", icon = icon("star")),
+      menuItem("SugarBase overview", tabName = "home", icon = icon("star")),
       menuItem("Glycan alignment", tabName = "alignment", icon = icon("stream"),
                badgeLabel = 'New!', badgeColor = 'green'),
       menuItem("Characteristic environment", tabName = "structuralcontext", icon = icon("chart-bar")),
@@ -104,7 +104,7 @@ AuthenticatedUI <- dashboardPage(
       #menuItem("SweetTalk", tabName = "tab_sweettalk", icon = icon("comment-dots")),
       #menuItem("SweetOrigins", tabName = "tab_sweetorigins", icon = icon("project-diagram")),
       #menuItem("Biomining", tabName = "tab_biomining", icon = icon("microscope")),
-      div(actionLink('citation_modal', 'Citing GlycoBase',
+      div(actionLink('citation_modal', 'Citing SugarBase',
                      style = 'color: #00B07D; padding-top: 30px;'), 
           style = 'font-size: 10pt; margin: 0px 5px 20px 0px;')
     ),
@@ -145,7 +145,7 @@ AuthenticatedUI <- dashboardPage(
     
     tabItems(
       tabItem(tabName = 'home',
-              h2('GlycoBase overview'),
+              h2('SugarBase overview'),
               fluidRow(
                 actionLink('modal_glycans', class='hoverbox',
                            box(title = 'Unique glycans',
@@ -178,7 +178,7 @@ AuthenticatedUI <- dashboardPage(
               fluidRow(
                 class = 'no-header-box',
                 div(downloadButton('button_download_glycobase', label = 'Download full (csv)', style = 'margin-right: 15px; float: right;', icon = icon('download')),
-                    HTML('<h2>Search GlycoBase <span style="font-size: 10pt;">(v2.0)</span></h2>'),
+                    HTML('<h2>Search SugarBase <span style="font-size: 10pt;">(v2.0)</span></h2>'),
                     style = 'padding-left: 15px;'),
                 box(title = '',
                     width = 12,
