@@ -2,6 +2,7 @@ data
 __pycache__
 rsconnect
 .DS_Store
+www/.DS_Store
 
 # History files
 .Rhistory

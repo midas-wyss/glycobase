@@ -3,9 +3,9 @@ library(httr)
 library(rjson)
 library(DT)
 library(plotly)
+PYTHON_DEPENDENCIES = c('synapseclient', 'requests', 'pandas', 'numpy')
 
 # profvis::profvis({ runApp() })
-DEBUG <- Sys.getenv('DEBUG') == 'TRUE'
 OFFLINE <- FALSE
 REQUIRE_LOGIN <- FALSE
 
@@ -44,116 +44,23 @@ if (!dir.exists('data')){
   dir.create('data')
 }
 
-# ------------------------ Virtualenv setup -------------------------- #
-if (Sys.info()[['sysname']] != 'Darwin'){
-  # When running on shinyapps.io, create a virtualenv 
-  reticulate::virtualenv_create(envname = 'python35_gly_env', 
-                                python = '/usr/bin/python3')
-  reticulate::virtualenv_install('python35_gly_env', 
-                                 packages = c('synapseclient', 'requests',
-                                              'pandas', 'numpy'))
-}
-reticulate::use_virtualenv('python35_gly_env', required = T)
+# ------------------ App virtualenv setup (Do not edit) ------------------- #
 
-# ---------------------------- OAuth --------------------------------- #
+virtualenv_dir = Sys.getenv('VIRTUALENV_NAME')
+python_path = Sys.getenv('PYTHON_PATH')
 
-if (!OFFLINE){
-  reticulate::source_python('connect_to_synapse.py')
-  # Initialize Synapse client
-  login_to_synapse(username = Sys.getenv('SYN_USERNAME'),
-                   api_key = Sys.getenv('SYN_API_KEY'))
-  logged_in <- reactiveVal(FALSE)
-  source('oauth.R')
-}
+# Create virtual env and install dependencies
+reticulate::virtualenv_create(envname = virtualenv_dir, python = python_path)
+reticulate::virtualenv_install(virtualenv_dir, packages = PYTHON_DEPENDENCIES, ignore_installed = T)
+reticulate::use_virtualenv(virtualenv_dir, required = T)
+
 
 # ----------------------------------- Server --------------------------------- #
 
 server <- function(input, output, session) {
   
-  if (REQUIRE_LOGIN){
-    # Click on the 'Log in' button to kick off the OAuth round trip
-    observeEvent(input$action, {
-      session$sendCustomMessage("customredirect", oauth2.0_authorize_url(API, APP, scope = SCOPE))
-      return()
-    })
-    
-    params <- parseQueryString(isolate(session$clientData$url_search))
-    if (!has_auth_code(params)) {
-      return()
-    }
-    
-    url <- paste0(API$access, '?', 'redirect_uri=', APP_URL, '&grant_type=', 
-                 'authorization_code', '&code=', params$code)
-    
-    # Get the access_token and userinfo token
-    token_request <- POST(url,
-                          encode = 'form',
-                          body = '',
-                          authenticate(APP$key, APP$secret, type = 'basic'),
-                          config = list()
-    )
-    
-    stop_for_status(token_request, task = 'Get an access token')
-    token_response <- httr::content(token_request, type = NULL)
-    
-    access_token <- token_response$access_token
-    id_token <- token_response$id_token
-    if (token_request$status_code == 201){
-      logged_in(T)
-    }
-    
-    # ------------------------------ App --------------------------------- #
-    
-    # Get information about the user
-    user_response = get_synapse_userinfo(access_token)
-    user_id = user_response$userid
-    user_content_formatted = paste(lapply(names(user_response), 
-                                          function(n) paste(n, user_response[n])), collapse="\n")
-    
-    # Get user profile
-    profile_response <- get_synapse_user_profile()
-    
-    # Cache responses
-    if (DEBUG){
-      saveRDS(token_response, 'cache/token_response.rds')
-      saveRDS(user_response, 'cache/user_response.rds')
-      saveRDS(profile_response, 'cache/profile_response.rds')
-    }
-    
-    output$userInfo <- renderText(user_content_formatted)
-    output$teamInfo <- renderText(teams_content_formatted)
-    # See in app_ui.R with verbatimTextOutput("userInfo")
   
-    # ---------------------------- Menus --------------------------------- #
-    
-    # Logout modal
-    observeEvent(input$user_account_modal, {
-      showModal(
-        modalDialog(title = "Synapse Account Information",
-                    h4(paste0(profile_response$firstName, ' ', profile_response$lastName)),
-                    p(profile_response$company),
-                    p(user_response$email, style = 'color: #00B07D;'),
-                    easyClose = T,
-                    footer = tagList(
-                      actionButton("button_view_syn_profile", "View Profile on Synapse",
-                                   style = 'color: #ffffff; background-color:  #00B07D; border-color: #0f9971ff;',
-                                   onclick = paste0("window.open('https://www.synapse.org/#!Profile:", profile_response$ownerId, "', '_blank')")),
-                      modalButton("Back to Analysis")
-                      #actionButton("button_logout", "Log Out")
-                    )
-        )
-      )
-    })
-    
-    output$logged_user <- renderText({
-      if(logged_in()){
-        return(paste0('Welcome, ', profile_response$firstName, '!'))
-      }
-    })
-    
-  } else {
-    
-    # Logout modal
+   # Logout modal
     observeEvent(input$user_account_modal, {
       showModal(
         modalDialog(title = "We appreciate your interest in GlycoBase!",
@@ -177,9 +84,6 @@ server <- function(input, output, session) {
     output$logged_user <- renderText({
       paste0('Welcome, Guest!')
     })
-    
-  }
-  # end REQUIRE_LOGIN
   
   # Citation info modal
   observeEvent(input$citation_modal, {
@@ -422,8 +326,8 @@ server <- function(input, output, session) {
       ),
       div(withSpinner(plotlyOutput('tsne_glycans'), type = 4, color = '#00B07D'),
           style = "overflow-y: auto;"),
-      selectInput('select_tsne_glycans', 'Highlight glycans containing monosaccharide:', 
-                  choices = c('All', monos()), selected = 'All', selectize = T),
+      #selectInput('select_tsne_glycans', 'Highlight glycans containing monosaccharide:', 
+      #            choices = c('All', monos()), selected = 'All', selectize = T),
       easyClose = T,
       footer = NULL
     ))
@@ -438,8 +342,8 @@ server <- function(input, output, session) {
       ),
       div(withSpinner(plotlyOutput('tsne_glycowords'), type = 4, color = '#019DB0'),
           style = "overflow-y: auto;"),
-      selectInput('select_tsne_glycowords', 'Highlight glycowords containing monosaccharide:', 
-                  choices = c('All', monos()), selected = 'All', selectize = T),
+      #selectInput('select_tsne_glycowords', 'Highlight glycowords containing monosaccharide:', 
+      #            choices = c('All', monos()), selected = 'All', selectize = T),
       easyClose = T,
       footer = NULL
     ))
@@ -454,8 +358,8 @@ server <- function(input, output, session) {
       ),
       div(withSpinner(plotlyOutput('tsne_glycoletters'), type = 4, color = '#903C83'),
           style = "overflow-y: auto;"),
-      selectInput('select_tsne_glycoletters', 'Highlight monosaccharide:', 
-                  choices = c('All', monos()), selected = 'All', selectize = T),
+      #selectInput('select_tsne_glycoletters', 'Highlight monosaccharide:', 
+      #            choices = c('All', monos()), selected = 'All', selectize = T),
       easyClose = T,
       footer = NULL
     ))
@@ -478,7 +382,7 @@ server <- function(input, output, session) {
     df = df[,c('GlycoBase_ID', 'Glycan', 'Link', 'Species', 'Immunogenic')]
     df$Link = factor(df$Link, c('N', 'O', 'Free', 'None'))
     df$Immunogenic = factor(df$Immunogenic, c('Yes', 'No', 'Unknown'))
-    df$Species = factor(df$Species, specs())
+    #df$Species = factor(df$Species, sort(unique(df$Species))) # TODO make this a dropdown but search _within_ column somehow
     
     write.table(df, 'data/glycobase_df.csv', sep = ',', row.names = F)
     
